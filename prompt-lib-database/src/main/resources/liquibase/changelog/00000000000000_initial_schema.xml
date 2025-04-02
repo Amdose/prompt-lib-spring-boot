@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <!-- Create Tables -->
+    <changeSet id="1" author="promptlib">
+        <comment>Create users table</comment>
+        <createTable tableName="users">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="varchar(50)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="email" type="varchar(100)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="password" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token" type="varchar(500)"/>
+            <column name="avatar_url" type="varchar(255)"/>
+            <column name="prompts_used" type="int" defaultValue="0"/>
+            <column name="prompts_saved" type="int" defaultValue="0"/>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="promptlib">
+        <comment>Create categories table</comment>
+        <createTable tableName="categories">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="display_order" type="int" defaultValue="0"/>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3" author="promptlib">
+        <comment>Create prompts table</comment>
+        <createTable tableName="prompts">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="preview_text" type="varchar(255)"/>
+            <column name="rating" type="decimal(3,1)" defaultValue="0.0"/>
+            <column name="uses_count" type="int" defaultValue="0"/>
+            <column name="created_by" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="fk_prompt_user" references="users(id)"/>
+            </column>
+            <column name="is_featured" type="boolean" defaultValueBoolean="false"/>
+            <column name="is_trending" type="boolean" defaultValueBoolean="false"/>
+            <column name="is_new" type="boolean" defaultValueBoolean="true"/>
+            <column name="status" type="varchar(20)" defaultValue="draft">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="4" author="promptlib">
+        <comment>Create prompt_categories table (many-to-many)</comment>
+        <createTable tableName="prompt_categories">
+            <column name="prompt_id" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="fk_pc_prompt" references="prompts(id)"/>
+            </column>
+            <column name="category_id" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="fk_pc_category" references="categories(id)"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="prompt_categories" columnNames="prompt_id, category_id"/>
+    </changeSet>
+
+    <changeSet id="5" author="promptlib">
+        <comment>Create tags table</comment>
+        <createTable tableName="tags">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="6" author="promptlib">
+        <comment>Create prompt_tags table (many-to-many)</comment>
+        <createTable tableName="prompt_tags">
+            <column name="prompt_id" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="fk_pt_prompt" references="prompts(id)"/>
+            </column>
+            <column name="tag_id" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="fk_pt_tag" references="tags(id)"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="prompt_tags" columnNames="prompt_id, tag_id"/>
+    </changeSet>
+
+    <changeSet id="7" author="promptlib">
+        <comment>Create saved_prompts table (many-to-many)</comment>
+        <createTable tableName="saved_prompts">
+            <column name="user_id" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="fk_sp_user" references="users(id)"/>
+            </column>
+            <column name="prompt_id" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="fk_sp_prompt" references="prompts(id)"/>
+            </column>
+            <column name="saved_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="saved_prompts" columnNames="user_id, prompt_id"/>
+    </changeSet>
+
+    <changeSet id="8" author="promptlib">
+        <comment>Create prompt_usage table</comment>
+        <createTable tableName="prompt_usage">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="prompt_id" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="fk_usage_prompt" references="prompts(id)"/>
+            </column>
+            <column name="user_id" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="fk_usage_user" references="users(id)"/>
+            </column>
+            <column name="action_type" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="used_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Insert Sample Data -->
+    <changeSet id="9" author="promptlib">
+        <comment>Insert sample users</comment>
+        <insert tableName="users">
+            <column name="id">usr-123</column>
+            <column name="username">johndoe</column>
+            <column name="email">john.doe@example.com</column>
+            <column name="password">$2a$10$Rw8qt9r7r3VrS0SKsW0NaOe1Cz5S/GXZJ0hJK6.SuXvMAVMcku0FC</column> <!-- Password: password123 -->
+            <column name="avatar_url">https://example.com/avatars/johndoe.png</column>
+            <column name="prompts_used">5</column>
+            <column name="prompts_saved">3</column>
+            <column name="created_at">2025-01-15 12:30:00</column>
+            <column name="updated_at">2025-01-15 12:30:00</column>
+        </insert>
+        <insert tableName="users">
+            <column name="id">usr-456</column>
+            <column name="username">janedoe</column>
+            <column name="email">jane.doe@example.com</column>
+            <column name="password">$2a$10$Rw8qt9r7r3VrS0SKsW0NaOe1Cz5S/GXZJ0hJK6.SuXvMAVMcku0FC</column> <!-- Password: password123 -->
+            <column name="avatar_url">https://example.com/avatars/janedoe.png</column>
+            <column name="prompts_used">12</column>
+            <column name="prompts_saved">8</column>
+            <column name="created_at">2025-01-20 14:45:00</column>
+            <column name="updated_at">2025-01-20 14:45:00</column>
+        </insert>
+        <insert tableName="users">
+            <column name="id">usr-789</column>
+            <column name="username">alice</column>
+            <column name="email">alice@example.com</column>
+            <column name="password">$2a$10$Rw8qt9r7r3VrS0SKsW0NaOe1Cz5S/GXZJ0hJK6.SuXvMAVMcku0FC</column> <!-- Password: password123 -->
+            <column name="avatar_url">https://example.com/avatars/alice.png</column>
+            <column name="prompts_used">7</column>
+            <column name="prompts_saved">4</column>
+            <column name="created_at">2025-02-05 09:15:00</column>
+            <column name="updated_at">2025-02-05 09:15:00</column>
+        </insert>
+        <insert tableName="users">
+            <column name="id">usr-321</column>
+            <column name="username">bob</column>
+            <column name="email">bob@example.com</column>
+            <column name="password">$2a$10$Rw8qt9r7r3VrS0SKsW0NaOe1Cz5S/GXZJ0hJK6.SuXvMAVMcku0FC</column> <!-- Password: password123 -->
+            <column name="avatar_url">https://example.com/avatars/bob.png</column>
+            <column name="prompts_used">3</column>
+            <column name="prompts_saved">1</column>
+            <column name="created_at">2025-02-10 16:20:00</column>
+            <column name="updated_at">2025-02-10 16:20:00</column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="10" author="promptlib">
+        <comment>Insert sample categories</comment>
+        <insert tableName="categories">
+            <column name="id">cat-1</column>
+            <column name="name">Creative Writing</column>
+            <column name="display_order">1</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+            <column name="updated_at">2025-01-10 10:00:00</column>
+        </insert>
+        <insert tableName="categories">
+            <column name="id">cat-2</column>
+            <column name="name">Code Assistance</column>
+            <column name="display_order">2</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+            <column name="updated_at">2025-01-10 10:00:00</column>
+        </insert>
+        <insert tableName="categories">
+            <column name="id">cat-3</column>
+            <column name="name">Business</column>
+            <column name="display_order">3</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+            <column name="updated_at">2025-01-10 10:00:00</column>
+        </insert>
+        <insert tableName="categories">
+            <column name="id">cat-4</column>
+            <column name="name">Academic</column>
+            <column name="display_order">4</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+            <column name="updated_at">2025-01-10 10:00:00</column>
+        </insert>
+        <insert tableName="categories">
+            <column name="id">cat-5</column>
+            <column name="name">Social Media</column>
+            <column name="display_order">5</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+            <column name="updated_at">2025-01-10 10:00:00</column>
+        </insert>
+        <insert tableName="categories">
+            <column name="id">cat-6</column>
+            <column name="name">Image Generation</column>
+            <column name="display_order">6</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+            <column name="updated_at">2025-01-10 10:00:00</column>
+        </insert>
+        <insert tableName="categories">
+            <column name="id">cat-7</column>
+            <column name="name">Data Analysis</column>
+            <column name="display_order">7</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+            <column name="updated_at">2025-01-10 10:00:00</column>
+        </insert>
+        <insert tableName="categories">
+            <column name="id">cat-8</column>
+            <column name="name">Personal Growth</column>
+            <column name="display_order">8</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+            <column name="updated_at">2025-01-10 10:00:00</column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="11" author="promptlib">
+        <comment>Insert sample tags</comment>
+        <insert tableName="tags">
+            <column name="id">tag-1</column>
+            <column name="name">writing</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+        </insert>
+        <insert tableName="tags">
+            <column name="id">tag-2</column>
+            <column name="name">story</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+        </insert>
+        <insert tableName="tags">
+            <column name="id">tag-3</column>
+            <column name="name">creative</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+        </insert>
+        <insert tableName="tags">
+            <column name="id">tag-4</column>
+            <column name="name">mystery</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+        </insert>
+        <insert tableName="tags">
+            <column name="id">tag-5</column>
+            <column name="name">code</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+        </insert>
+        <insert tableName="tags">
+            <column name="id">tag-6</column>
+            <column name="name">refactoring</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+        </insert>
+        <insert tableName="tags">
+            <column name="id">tag-7</column>
+            <column name="name">performance</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+        </insert>
+        <insert tableName="tags">
+            <column name="id">tag-8</column>
+            <column name="name">email</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+        </insert>
+        <insert tableName="tags">
+            <column name="id">tag-9</column>
+            <column name="name">professional</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+        </insert>
+        <insert tableName="tags">
+            <column name="id">tag-10</column>
+            <column name="name">business</column>
+            <column name="created_at">2025-01-10 10:00:00</column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="12" author="promptlib">
+        <comment>Insert sample prompts</comment>
+        <insert tableName="prompts">
+            <column name="id">prompt-1</column>
+            <column name="title">Story Opening Generator</column>
+            <column name="content">Write an engaging opening paragraph for a story that begins with an unexpected event. Include vivid sensory details and introduce a character who is surprised by the event.</column>
+            <column name="preview_text">Write an engaging opening paragraph for a story...</column>
+            <column name="rating">4.8</column>
+            <column name="uses_count">1243</column>
+            <column name="created_by">usr-456</column>
+            <column name="is_featured">false</column>
+            <column name="is_trending">true</column>
+            <column name="is_new">false</column>
+            <column name="status">published</column>
+            <column name="created_at">2025-01-30 09:45:00</column>
+            <column name="updated_at">2025-03-01 14:25:00</column>
+        </insert>
+        <insert tableName="prompts">
+            <column name="id">prompt-2</column>
+            <column name="title">Creative Story Writing</column>
+            <column name="content">Write a short story about a mysterious package that arrives unexpectedly. Include vivid sensory details and a surprising twist at the end.</column>
+            <column name="preview_text">Write a short story about a mysterious package...</column>
+            <column name="rating">4.8</column>
+            <column name="uses_count">1243</column>
+            <column name="created_by">usr-789</column>
+            <column name="is_featured">false</column>
+            <column name="is_trending">true</column>
+            <column name="is_new">false</column>
+            <column name="status">published</column>
+            <column name="created_at">2025-02-15 11:30:00</column>
+            <column name="updated_at">2025-03-15 10:20:00</column>
+        </insert>
+        <insert tableName="prompts">
+            <column name="id">prompt-3</column>
+            <column name="title">Code Refactoring Assistant</column>
+            <column name="content">Analyze this code snippet and suggest improvements focusing on performance, readability, and best practices. Include specific examples and explanations.</column>
+            <column name="preview_text">Analyze this code snippet and suggest improvements...</column>
+            <column name="rating">4.9</column>
+            <column name="uses_count">863</column>
+            <column name="created_by">usr-123</column>
+            <column name="is_featured">true</column>
+            <column name="is_trending">false</column>
+            <column name="is_new">false</column>
+            <column name="status">published</column>
+            <column name="created_at">2025-03-27 14:00:00</column>
+            <column name="updated_at">2025-03-31 16:45:00</column>
+        </insert>
+        <insert tableName="prompts">
+            <column name="id">prompt-4</column>
+            <column name="title">Professional Email Composer</column>
+            <column name="content">Write a professional email addressing [TOPIC]. Maintain a formal yet friendly tone, include clear subject line, appropriate greeting, concise body, and professional closing.</column>
+            <column name="preview_text">Write a professional email addressing [TOPIC]...</column>
+            <column name="rating">4.7</column>
+            <column name="uses_count">2345</column>
+            <column name="created_by">usr-321</column>
+            <column name="is_featured">false</column>
+            <column name="is_trending">true</column>
+            <column name="is_new">false</column>
+            <column name="status">published</column>
+            <column name="created_at">2025-01-01 08:15:00</column>
+            <column name="updated_at">2025-03-21 09:30:00</column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="13" author="promptlib">
+        <comment>Insert prompt-category relationships</comment>
+        <insert tableName="prompt_categories">
+            <column name="prompt_id">prompt-1</column>
+            <column name="category_id">cat-1</column>
+        </insert>
+        <insert tableName="prompt_categories">
+            <column name="prompt_id">prompt-2</column>
+            <column name="category_id">cat-1</column>
+        </insert>
+        <insert tableName="prompt_categories">
+            <column name="prompt_id">prompt-3</column>
+            <column name="category_id">cat-2</column>
+        </insert>
+        <insert tableName="prompt_categories">
+            <column name="prompt_id">prompt-4</column>
+            <column name="category_id">cat-3</column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="14" author="promptlib">
+        <comment>Insert prompt-tag relationships</comment>
+        <insert tableName="prompt_tags">
+            <column name="prompt_id">prompt-1</column>
+            <column name="tag_id">tag-1</column>
+        </insert>
+        <insert tableName="prompt_tags">
+            <column name="prompt_id">prompt-1</column>
+            <column name="tag_id">tag-2</column>
+        </insert>
+        <insert tableName="prompt_tags">
+            <column name="prompt_id">prompt-1</column>
+            <column name="tag_id">tag-3</column>
+        </insert>
+        <insert tableName="prompt_tags">
+            <column name="prompt_id">prompt-2</column>
+            <column name="tag_id">tag-2</column>
+        </insert>
+        <insert tableName="prompt_tags">
+            <column name="prompt_id">prompt-2</column>
+            <column name="tag_id">tag-3</column>
+        </insert>
+        <insert tableName="prompt_tags">
+            <column name="prompt_id">prompt-2</column>
+            <column name="tag_id">tag-4</column>
+        </insert>
+        <insert tableName="prompt_tags">
+            <column name="prompt_id">prompt-3</column>
+            <column name="tag_id">tag-5</column>
+        </insert>
+        <insert tableName="prompt_tags">
+            <column name="prompt_id">prompt-3</column>
+            <column name="tag_id">tag-6</column>
+        </insert>
+        <insert tableName="prompt_tags">
+            <column name="prompt_id">prompt-3</column>
+            <column name="tag_id">tag-7</column>
+        </insert>
+        <insert tableName="prompt_tags">
+            <column name="prompt_id">prompt-4</column>
+            <column name="tag_id">tag-8</column>
+        </insert>
+        <insert tableName="prompt_tags">
+            <column name="prompt_id">prompt-4</column>
+            <column name="tag_id">tag-9</column>
+        </insert>
+        <insert tableName="prompt_tags">
+            <column name="prompt_id">prompt-4</column>
+            <column name="tag_id">tag-10</column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="15" author="promptlib">
+        <comment>Insert saved prompts relationships</comment>
+        <insert tableName="saved_prompts">
+            <column name="user_id">usr-123</column>
+            <column name="prompt_id">prompt-1</column>
+            <column name="saved_at">2025-02-15 10:30:00</column>
+        </insert>
+        <insert tableName="saved_prompts">
+            <column name="user_id">usr-123</column>
+            <column name="prompt_id">prompt-2</column>
+            <column name="saved_at">2025-02-16 14:20:00</column>
+        </insert>
+        <insert tableName="saved_prompts">
+            <column name="user_id">usr-123</column>
+            <column name="prompt_id">prompt-4</column>
+            <column name="saved_at">2025-02-18 09:45:00</column>
+        </insert>
+        <insert tableName="saved_prompts">
+            <column name="user_id">usr-456</column>
+            <column name="prompt_id">prompt-3</column>
+            <column name="saved_at">2025-03-05 11:15:00</column>
+        </insert>
+        <insert tableName="saved_prompts">
+            <column name="user_id">usr-789</column>
+            <column name="prompt_id">prompt-1</column>
+            <column name="saved_at">2025-03-10 16:30:00</column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="16" author="promptlib">
+        <comment>Insert prompt usage data</comment>
+        <insert tableName="prompt_usage">
+            <column name="id">usage-1</column>
+            <column name="prompt_id">prompt-1</column>
+            <column name="user_id">usr-123</column>
+            <column name="action_type">COPY</column>
+            <column name="used_at">2025-02-20 13:45:00</column>
+        </insert>
+        <insert tableName="prompt_usage">
+            <column name="id">usage-2</column>
+            <column name="prompt_id">prompt-3</column>
+            <column name="user_id">usr-456</column>
+            <column name="action_type">COPY</column>
+            <column name="used_at">2025-03-12 09:30:00</column>
+        </insert>
+        <insert tableName="prompt_usage">
+            <column name="id">usage-3</column>
+            <column name="prompt_id">prompt-4</column>
+            <column name="user_id">usr-789</column>
+            <column name="action_type">COPY</column>
+            <column name="used_at">2025-03-15 14:20:00</column>
+        </insert>
+        <insert tableName="prompt_usage">
+            <column name="id">usage-4</column>
+            <column name="prompt_id">prompt-2</column>
+            <column name="user_id">usr-123</column>
+            <column name="action_type">SHARE</column>
+            <column name="used_at">2025-03-18 16:45:00</column>
+        </insert>
+        <insert tableName="prompt_usage">
+            <column name="id">usage-5</column>
+            <column name="prompt_id">prompt-1</column>
+            <column name="user_id">usr-321</column>
+            <column name="action_type">COPY</column>
+            <column name="used_at">2025-03-20 10:15:00</column>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
