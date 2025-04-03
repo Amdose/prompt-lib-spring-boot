@@ -2,7 +2,8 @@ package com.amdose.promptlib.database.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+
+import java.util.Date;
 import java.util.Set;
 
 @Data
@@ -43,10 +44,10 @@ public class Prompt {
     private String status = "draft";
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private Date createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    private Date updatedAt;
 
     @ManyToMany
     @JoinTable(

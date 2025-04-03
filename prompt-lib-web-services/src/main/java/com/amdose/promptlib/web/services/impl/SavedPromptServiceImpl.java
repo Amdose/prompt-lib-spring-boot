@@ -13,7 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.util.Date;
+
 
 @Service
 public class SavedPromptServiceImpl extends BaseServiceImpl<SavedPrompt, String, SavedPromptRepository> implements SavedPromptService {
@@ -51,7 +52,7 @@ public class SavedPromptServiceImpl extends BaseServiceImpl<SavedPrompt, String,
         SavedPrompt savedPrompt = new SavedPrompt();
         savedPrompt.setUser(user);
         savedPrompt.setPrompt(prompt);
-        savedPrompt.setSavedAt(LocalDateTime.now());
+        savedPrompt.setSavedAt(new Date());
 
         userService.incrementPromptsSaved(userId);
         return save(savedPrompt);

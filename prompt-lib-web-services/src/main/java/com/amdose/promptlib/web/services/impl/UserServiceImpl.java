@@ -8,7 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -58,8 +58,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, String, UserRepositor
 
         user.setId(UUID.randomUUID().toString());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
+        user.setCreatedAt(new Date());
+        user.setUpdatedAt(new Date());
         return save(user);
     }
 
@@ -83,7 +83,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, String, UserRepositor
             user.setPassword(existingUser.getPassword());
         }
 
-        user.setUpdatedAt(LocalDateTime.now());
+        user.setUpdatedAt(new Date());
         return save(user);
     }
 

@@ -2,7 +2,8 @@ package com.amdose.promptlib.database.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
+
+import java.util.Date;
 
 @Data
 @Entity
@@ -20,5 +21,5 @@ public class SavedPrompt {
     private Prompt prompt;
 
     @Column(name = "saved_at", nullable = false)
-    private LocalDateTime savedAt;
+    private Date savedAt;
 } 

@@ -14,7 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -119,8 +119,8 @@ public class PromptServiceImpl extends BaseServiceImpl<Prompt, String, PromptRep
     @Override
     @Transactional
     public PromptResponse createPrompt(Prompt prompt) {
-        prompt.setCreatedAt(LocalDateTime.now());
-        prompt.setUpdatedAt(LocalDateTime.now());
+        prompt.setCreatedAt(new Date());
+        prompt.setUpdatedAt(new Date());
         prompt.setIsNew(true);
         prompt.setIsFeatured(false);
         prompt.setIsTrending(false);
@@ -135,7 +135,7 @@ public class PromptServiceImpl extends BaseServiceImpl<Prompt, String, PromptRep
         Prompt existingPrompt = findById(prompt.getId())
             .orElseThrow(() -> new IllegalArgumentException("Prompt not found"));
 
-        prompt.setUpdatedAt(LocalDateTime.now());
+        prompt.setUpdatedAt(new Date());
         return mapToResponse(save(prompt));
     }
 
@@ -154,7 +154,7 @@ public class PromptServiceImpl extends BaseServiceImpl<Prompt, String, PromptRep
         Prompt prompt = findById(promptId)
             .orElseThrow(() -> new IllegalArgumentException("Prompt not found"));
         prompt.setIsFeatured(featured);
-        prompt.setUpdatedAt(LocalDateTime.now());
+        prompt.setUpdatedAt(new Date());
         save(prompt);
     }
 
@@ -164,7 +164,7 @@ public class PromptServiceImpl extends BaseServiceImpl<Prompt, String, PromptRep
         Prompt prompt = findById(promptId)
             .orElseThrow(() -> new IllegalArgumentException("Prompt not found"));
         prompt.setIsTrending(trending);
-        prompt.setUpdatedAt(LocalDateTime.now());
+        prompt.setUpdatedAt(new Date());
         save(prompt);
     }
 
@@ -174,7 +174,7 @@ public class PromptServiceImpl extends BaseServiceImpl<Prompt, String, PromptRep
         Prompt prompt = findById(promptId)
             .orElseThrow(() -> new IllegalArgumentException("Prompt not found"));
         prompt.setIsNew(isNew);
-        prompt.setUpdatedAt(LocalDateTime.now());
+        prompt.setUpdatedAt(new Date());
         save(prompt);
     }
 
@@ -184,7 +184,7 @@ public class PromptServiceImpl extends BaseServiceImpl<Prompt, String, PromptRep
         Prompt prompt = findById(promptId)
             .orElseThrow(() -> new IllegalArgumentException("Prompt not found"));
         prompt.setStatus(status);
-        prompt.setUpdatedAt(LocalDateTime.now());
+        prompt.setUpdatedAt(new Date());
         save(prompt);
     }
 } 

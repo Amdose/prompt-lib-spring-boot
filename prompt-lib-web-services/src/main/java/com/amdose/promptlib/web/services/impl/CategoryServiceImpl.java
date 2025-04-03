@@ -7,7 +7,7 @@ import com.amdose.promptlib.web.services.base.BaseServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,8 +39,8 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category, String, Categ
             throw new IllegalArgumentException("Category name already exists");
         }
 
-        category.setCreatedAt(LocalDateTime.now());
-        category.setUpdatedAt(LocalDateTime.now());
+        category.setCreatedAt(new Date());
+        category.setUpdatedAt(new Date());
         return save(category);
     }
 
@@ -54,7 +54,7 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category, String, Categ
             throw new IllegalArgumentException("Category name already exists");
         }
 
-        category.setUpdatedAt(LocalDateTime.now());
+        category.setUpdatedAt(new Date());
         return save(category);
     }
 } 

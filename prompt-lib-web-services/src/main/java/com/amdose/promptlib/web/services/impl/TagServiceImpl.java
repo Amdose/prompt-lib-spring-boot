@@ -5,10 +5,8 @@ import com.amdose.promptlib.database.repositories.TagRepository;
 import com.amdose.promptlib.web.services.TagService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -78,7 +76,7 @@ public class TagServiceImpl implements TagService {
         }
 
         tag.setId(UUID.randomUUID().toString());
-        tag.setCreatedAt(LocalDateTime.now());
+        tag.setCreatedAt(new Date());
         return save(tag);
     }
 

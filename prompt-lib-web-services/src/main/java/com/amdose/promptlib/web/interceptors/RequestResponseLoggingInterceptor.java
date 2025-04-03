@@ -39,7 +39,7 @@ public class RequestResponseLoggingInterceptor extends AbstractInterceptor {
                                   Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request,
                                   ServerHttpResponse response) {
         try {
-            log.debug("Response: " + JsonUtils.convertToString((body)));
+//            log.debug("Response: " + JsonUtils.convertToString((body))); // TODO: uncomment
         } catch (Exception e) {
             log.error("Error while saving the Body's Response: ", e);
         }

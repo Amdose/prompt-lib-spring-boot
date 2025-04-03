@@ -3,6 +3,7 @@ package com.amdose.promptlib.web.controllers;
 import com.amdose.promptlib.database.entities.Category;
 import com.amdose.promptlib.web.services.CategoryService;
 import jakarta.validation.Valid;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class CategoryController {
     }
 
     @GetMapping
+    @Cacheable(value = "getAllCategories", keyGenerator = "localizedGenerator")
     public List<Category> getAllCategories() {
         return categoryService.findAll();
     }

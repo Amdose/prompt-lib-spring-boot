@@ -2,6 +2,7 @@ package com.amdose.promptlib.web.controllers;
 
 import com.amdose.promptlib.database.entities.PromptUsage;
 import com.amdose.promptlib.database.entities.User;
+import com.amdose.promptlib.web.security.SecurityUtils;
 import com.amdose.promptlib.web.services.PromptUsageService;
 import com.amdose.promptlib.web.services.UserService;
 import org.springframework.data.domain.Page;
@@ -19,9 +20,9 @@ public class PromptUsageController {
         this.userService = userService;
     }
 
-    @GetMapping("/user/{userId}")
-    public Page<PromptUsage> getPromptUsageByUser(@PathVariable String userId, Pageable pageable) {
-        User user = userService.findById(userId)
+    @GetMapping("/user")
+    public Page<PromptUsage> getPromptUsageByUser(Pageable pageable) {
+        User user = userService.findById(SecurityUtils.getCurrentUserId())
             .orElseThrow(() -> new IllegalArgumentException("User not found"));
         return promptUsageService.findByUser(user, pageable);
     }

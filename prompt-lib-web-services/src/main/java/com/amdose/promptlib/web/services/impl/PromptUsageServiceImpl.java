@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -91,7 +91,7 @@ public class PromptUsageServiceImpl implements PromptUsageService {
         usage.setUser(user);
         usage.setPrompt(prompt);
         usage.setActionType(actionType);
-        usage.setUsedAt(LocalDateTime.now());
+        usage.setUsedAt(new Date());
 
         userService.incrementPromptsUsed(userId);
         promptService.incrementUsesCount(promptId);
