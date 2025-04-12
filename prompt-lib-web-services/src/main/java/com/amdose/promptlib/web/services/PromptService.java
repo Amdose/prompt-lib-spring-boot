@@ -3,7 +3,9 @@ package com.amdose.promptlib.web.services;
 import com.amdose.promptlib.database.entities.Prompt;
 import com.amdose.promptlib.database.entities.User;
 import com.amdose.promptlib.web.payloads.PaginatedResponse;
+import com.amdose.promptlib.web.payloads.PromptRequest;
 import com.amdose.promptlib.web.payloads.PromptResponse;
+import com.amdose.promptlib.web.payloads.SuccessResponse;
 import com.amdose.promptlib.web.services.base.BaseService;
 import org.springframework.data.domain.Pageable;
 
@@ -19,11 +21,11 @@ public interface PromptService extends BaseService<Prompt, String> {
     PaginatedResponse<PromptResponse> searchPrompts(String query, Pageable pageable);
     List<PromptResponse> findByCategoriesId(String categoryId);
     List<PromptResponse> findByTagsId(String tagId);
-    PromptResponse createPrompt(Prompt prompt);
-    PromptResponse updatePrompt(Prompt prompt);
-    void incrementUsesCount(String promptId);
-    void markAsFeatured(String promptId, boolean featured);
-    void markAsTrending(String promptId, boolean trending);
-    void markAsNew(String promptId, boolean isNew);
-    void updateStatus(String promptId, String status);
+    SuccessResponse createPrompt(PromptRequest request);
+    SuccessResponse updatePrompt(String id, PromptRequest request);
+    SuccessResponse incrementUsesCount(String promptId);
+    SuccessResponse markAsFeatured(String promptId, boolean featured);
+    SuccessResponse markAsTrending(String promptId, boolean trending);
+    SuccessResponse markAsNew(String promptId, boolean isNew);
+    SuccessResponse updateStatus(String promptId, String status);
 } 

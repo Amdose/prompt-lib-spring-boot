@@ -64,6 +64,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(mvcMatcherBuilder.pattern("/v3/api-docs/**")).permitAll() // Allow access to API docs
                         .requestMatchers(mvcMatcherBuilder.pattern("/swagger-ui/**")).permitAll() // Allow access to Swagger UI
+                        .requestMatchers(mvcMatcherBuilder.pattern("/swagger-ui.html")).permitAll() // Allow access to Swagger UI
                         .requestMatchers(mvcMatcherBuilder.pattern("/swagger-resources/**")).permitAll()
                         .requestMatchers(mvcMatcherBuilder.pattern("/auth/**")).permitAll()
                         .requestMatchers(mvcMatcherBuilder.pattern("/api/categories/**")).permitAll()

@@ -1,10 +1,8 @@
 package com.amdose.promptlib.database.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.util.Date;
 
@@ -12,7 +10,10 @@ import java.util.Date;
 @Entity
 @Table(name = "categories")
 public class Category {
+
     @Id
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
     private String id;
 
     @Column(unique = true, nullable = false)

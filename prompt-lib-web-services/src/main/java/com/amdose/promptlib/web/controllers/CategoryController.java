@@ -29,7 +29,7 @@ public class CategoryController {
     }
 
     @GetMapping
-    @Cacheable(value = "getAllCategories", keyGenerator = "localizedGenerator")
+//    @Cacheable(value = "getAllCategories", keyGenerator = "localizedGenerator")
     public List<Category> getAllCategories() {
         return categoryService.findAll();
     }

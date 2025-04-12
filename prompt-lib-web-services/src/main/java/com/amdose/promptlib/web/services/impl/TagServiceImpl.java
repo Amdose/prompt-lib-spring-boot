@@ -3,6 +3,7 @@ package com.amdose.promptlib.web.services.impl;
 import com.amdose.promptlib.database.entities.Tag;
 import com.amdose.promptlib.database.repositories.TagRepository;
 import com.amdose.promptlib.web.services.TagService;
+import com.amdose.promptlib.web.services.base.BaseServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,11 +13,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class TagServiceImpl implements TagService {
-    private final TagRepository repository;
-
+public class TagServiceImpl extends BaseServiceImpl<Tag, String, TagRepository> implements TagService {
     public TagServiceImpl(TagRepository repository) {
-        this.repository = repository;
+        super(repository);
     }
 
     @Override

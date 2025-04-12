@@ -3,7 +3,9 @@ package com.amdose.promptlib.web.controllers;
 import com.amdose.promptlib.database.entities.Prompt;
 import com.amdose.promptlib.database.entities.User;
 import com.amdose.promptlib.web.payloads.PaginatedResponse;
+import com.amdose.promptlib.web.payloads.PromptRequest;
 import com.amdose.promptlib.web.payloads.PromptResponse;
+import com.amdose.promptlib.web.payloads.SuccessResponse;
 import com.amdose.promptlib.web.services.PromptService;
 import com.amdose.promptlib.web.services.UserService;
 import jakarta.validation.Valid;
@@ -24,8 +26,8 @@ public class PromptController {
     }
 
     @PostMapping
-    public PromptResponse createPrompt(@Valid @RequestBody Prompt prompt) {
-        return promptService.createPrompt(prompt);
+    public SuccessResponse createPrompt(@Valid @RequestBody PromptRequest request) {
+        return promptService.createPrompt(request);
     }
 
     @GetMapping("/{id}")
@@ -41,9 +43,8 @@ public class PromptController {
     }
 
     @PutMapping("/{id}")
-    public PromptResponse updatePrompt(@PathVariable String id, @Valid @RequestBody Prompt prompt) {
-        prompt.setId(id);
-        return promptService.updatePrompt(prompt);
+    public SuccessResponse updatePrompt(@PathVariable String id, @Valid @RequestBody PromptRequest request) {
+        return promptService.updatePrompt(id, request);
     }
 
     @DeleteMapping("/{id}")
@@ -89,22 +90,22 @@ public class PromptController {
     }
 
     @PutMapping("/{id}/featured")
-    public void markAsFeatured(@PathVariable String id, @RequestParam boolean featured) {
-        promptService.markAsFeatured(id, featured);
+    public SuccessResponse markAsFeatured(@PathVariable String id, @RequestParam boolean featured) {
+        return promptService.markAsFeatured(id, featured);
     }
 
     @PutMapping("/{id}/trending")
-    public void markAsTrending(@PathVariable String id, @RequestParam boolean trending) {
-        promptService.markAsTrending(id, trending);
+    public SuccessResponse markAsTrending(@PathVariable String id, @RequestParam boolean trending) {
+        return promptService.markAsTrending(id, trending);
     }
 
     @PutMapping("/{id}/new")
-    public void markAsNew(@PathVariable String id, @RequestParam boolean isNew) {
-        promptService.markAsNew(id, isNew);
+    public SuccessResponse markAsNew(@PathVariable String id, @RequestParam boolean isNew) {
+        return promptService.markAsNew(id, isNew);
     }
 
     @PutMapping("/{id}/status")
-    public void updateStatus(@PathVariable String id, @RequestParam String status) {
-        promptService.updateStatus(id, status);
+    public SuccessResponse updateStatus(@PathVariable String id, @RequestParam String status) {
+        return promptService.updateStatus(id, status);
     }
 } 

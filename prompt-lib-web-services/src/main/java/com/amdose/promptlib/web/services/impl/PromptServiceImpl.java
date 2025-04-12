@@ -6,8 +6,14 @@ import com.amdose.promptlib.database.entities.Tag;
 import com.amdose.promptlib.database.entities.User;
 import com.amdose.promptlib.database.repositories.PromptRepository;
 import com.amdose.promptlib.web.payloads.PaginatedResponse;
+import com.amdose.promptlib.web.payloads.PromptRequest;
 import com.amdose.promptlib.web.payloads.PromptResponse;
+import com.amdose.promptlib.web.payloads.SuccessResponse;
+import com.amdose.promptlib.web.security.SecurityUtils;
+import com.amdose.promptlib.web.services.CategoryService;
 import com.amdose.promptlib.web.services.PromptService;
+import com.amdose.promptlib.web.services.TagService;
+import com.amdose.promptlib.web.services.UserService;
 import com.amdose.promptlib.web.services.base.BaseServiceImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,12 +22,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 public class PromptServiceImpl extends BaseServiceImpl<Prompt, String, PromptRepository> implements PromptService {
-    public PromptServiceImpl(PromptRepository repository) {
+    private final UserService userService;
+    private final CategoryService categoryService;
+    private final TagService tagService;
+
+    public PromptServiceImpl(PromptRepository repository, UserService userService, 
+                           CategoryService categoryService, TagService tagService) {
         super(repository);
+        this.userService = userService;
+        this.categoryService = categoryService;
+        this.tagService = tagService;
     }
 
     public PromptResponse mapToResponse(Prompt prompt) {
@@ -38,10 +54,10 @@ public class PromptServiceImpl extends BaseServiceImpl<Prompt, String, PromptRep
         response.setNew(prompt.getIsNew());
         response.setStatus(prompt.getStatus());
         response.setCategories(prompt.getCategories().stream()
-            .map(Category::getId)
+            .map(Category::getName)
             .collect(Collectors.toList()));
         response.setTags(prompt.getTags().stream()
-            .map(Tag::getId)
+            .map(Tag::getName)
             .collect(Collectors.toList()));
         response.setCreatedAt(prompt.getCreatedAt());
         response.setUpdatedAt(prompt.getUpdatedAt());
@@ -118,7 +134,12 @@ public class PromptServiceImpl extends BaseServiceImpl<Prompt, String, PromptRep
 
     @Override
     @Transactional
-    public PromptResponse createPrompt(Prompt prompt) {
+    public SuccessResponse createPrompt(PromptRequest request) {
+        Prompt prompt = new Prompt();
+        prompt.setId(UUID.randomUUID().toString());
+        prompt.setTitle(request.getTitle());
+        prompt.setContent(request.getContent());
+        prompt.setPreviewText(request.getPreviewText());
         prompt.setCreatedAt(new Date());
         prompt.setUpdatedAt(new Date());
         prompt.setIsNew(true);
@@ -126,65 +147,111 @@ public class PromptServiceImpl extends BaseServiceImpl<Prompt, String, PromptRep
         prompt.setIsTrending(false);
         prompt.setUsesCount(0);
         prompt.setRating(0.0);
-        return mapToResponse(save(prompt));
+        prompt.setStatus("published");
+
+        // Set categories
+        Set<Category> categories = request.getCategories().stream()
+            .map(categoryId -> categoryService.findByName(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found: " + categoryId)))
+            .collect(Collectors.toSet());
+        prompt.setCategories(categories);
+
+        // Set tags
+        Set<Tag> tags = request.getTags().stream()
+            .map(tagId -> tagService.findByName(tagId)
+                .orElseThrow(() -> new IllegalArgumentException("Tag not found: " + tagId)))
+            .collect(Collectors.toSet());
+        prompt.setTags(tags);
+
+        // Set created by
+        String currentUserId = "admin";
+        User user = userService.findById("admin").get();
+        prompt.setCreatedBy(user);
+
+        Prompt savedPrompt = save(prompt);
+        return new SuccessResponse();
     }
 
     @Override
     @Transactional
-    public PromptResponse updatePrompt(Prompt prompt) {
-        Prompt existingPrompt = findById(prompt.getId())
+    public SuccessResponse updatePrompt(String id, PromptRequest request) {
+        Prompt existingPrompt = findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Prompt not found"));
 
-        prompt.setUpdatedAt(new Date());
-        return mapToResponse(save(prompt));
+        existingPrompt.setTitle(request.getTitle());
+        existingPrompt.setContent(request.getContent());
+        existingPrompt.setPreviewText(request.getPreviewText());
+        existingPrompt.setUpdatedAt(new Date());
+
+        // Update categories
+        Set<Category> categories = request.getCategories().stream()
+            .map(categoryId -> categoryService.findByName(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found: " + categoryId)))
+            .collect(Collectors.toSet());
+        existingPrompt.setCategories(categories);
+
+        // Update tags
+        Set<Tag> tags = request.getTags().stream()
+            .map(tagId -> tagService.findByName(tagId)
+                .orElseThrow(() -> new IllegalArgumentException("Tag not found: " + tagId)))
+            .collect(Collectors.toSet());
+        existingPrompt.setTags(tags);
+
+        Prompt updatedPrompt = save(existingPrompt);
+        return new SuccessResponse();
     }
 
     @Override
     @Transactional
-    public void incrementUsesCount(String promptId) {
+    public SuccessResponse incrementUsesCount(String promptId) {
         Prompt prompt = findById(promptId)
             .orElseThrow(() -> new IllegalArgumentException("Prompt not found"));
         prompt.setUsesCount(prompt.getUsesCount() + 1);
         save(prompt);
+        return new SuccessResponse();
     }
 
     @Override
     @Transactional
-    public void markAsFeatured(String promptId, boolean featured) {
+    public SuccessResponse markAsFeatured(String promptId, boolean featured) {
         Prompt prompt = findById(promptId)
             .orElseThrow(() -> new IllegalArgumentException("Prompt not found"));
         prompt.setIsFeatured(featured);
         prompt.setUpdatedAt(new Date());
         save(prompt);
+        return new SuccessResponse();
     }
 
     @Override
     @Transactional
-    public void markAsTrending(String promptId, boolean trending) {
+    public SuccessResponse markAsTrending(String promptId, boolean trending) {
         Prompt prompt = findById(promptId)
             .orElseThrow(() -> new IllegalArgumentException("Prompt not found"));
         prompt.setIsTrending(trending);
         prompt.setUpdatedAt(new Date());
         save(prompt);
+        return new SuccessResponse();
     }
 
     @Override
     @Transactional
-    public void markAsNew(String promptId, boolean isNew) {
+    public SuccessResponse markAsNew(String promptId, boolean isNew) {
         Prompt prompt = findById(promptId)
             .orElseThrow(() -> new IllegalArgumentException("Prompt not found"));
         prompt.setIsNew(isNew);
         prompt.setUpdatedAt(new Date());
         save(prompt);
+        return new SuccessResponse();
     }
 
     @Override
     @Transactional
-    public void updateStatus(String promptId, String status) {
+    public SuccessResponse updateStatus(String promptId, String status) {
         Prompt prompt = findById(promptId)
             .orElseThrow(() -> new IllegalArgumentException("Prompt not found"));
         prompt.setStatus(status);
         prompt.setUpdatedAt(new Date());
         save(prompt);
+        return new SuccessResponse();
     }
 } 
